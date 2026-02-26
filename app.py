@@ -1,4 +1,5 @@
 import streamlit as st
+from playlist_logic import *
 
 from playlist_logic import (
     DEFAULT_PROFILE,
@@ -249,10 +250,20 @@ def add_song_sidebar():
             "tags": tags,
         }
         if title and artist:
-            normalized = normalize_song(song)
-            all_songs = st.session_state.songs[:]
-            all_songs.append(normalized)
-            st.session_state.songs = all_songs
+        # Check for duplicates before adding
+            if is_duplicate_song(song, st.session_state.songs):
+                st.sidebar.warning(f"'{title}' by {artist} already exists in the playlist!")
+            else:
+                normalized = normalize_song(song)
+                all_songs = st.session_state.songs[:]
+                all_songs.append(normalized)
+                st.session_state.songs = all_songs
+                st.sidebar.success(f"Added '{title}' by {artist} to the playlist!")
+        # if title and artist:
+        #     normalized = normalize_song(song)
+        #     all_songs = st.session_state.songs[:]
+        #     all_songs.append(normalized)
+        #     st.session_state.songs = all_songs
 
 
 def playlist_tabs(playlists):

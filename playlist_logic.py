@@ -30,7 +30,6 @@ def normalize_genre(genre: str) -> str:
     """Normalize a genre name for comparisons."""
     return genre.lower().strip()
 
-
 def normalize_song(raw: Song) -> Song:
     """Return a normalized song dict with expected keys."""
     title = normalize_title(str(raw.get("title", "")))
@@ -43,18 +42,48 @@ def normalize_song(raw: Song) -> Song:
             energy = int(energy)
         except ValueError:
             energy = 0
-
-    tags = raw.get("tags", [])
-    if isinstance(tags, str):
-        tags = [tags]
-
+    
     return {
         "title": title,
         "artist": artist,
         "genre": genre,
-        "energy": energy,
-        "tags": tags,
+        "energy": energy
     }
+def is_duplicate_song(song: Song, playlist: list) -> bool:
+    """Check if a normalized song already exists in the playlist."""
+    normalized_new = normalize_song(song)
+    
+    for existing_song in playlist:
+        normalized_existing = normalize_song(existing_song)
+        if (normalized_new["title"] == normalized_existing["title"] and
+            normalized_new["artist"] == normalized_existing["artist"]):
+            return True
+    
+    return False
+# def normalize_song(raw: Song) -> Song:
+#     """Return a normalized song dict with expected keys."""
+#     title = normalize_title(str(raw.get("title", "")))
+#     artist = normalize_artist(str(raw.get("artist", "")))
+#     genre = normalize_genre(str(raw.get("genre", "")))
+#     energy = raw.get("energy", 0)
+
+#     if isinstance(energy, str):
+#         try:
+#             energy = int(energy)
+#         except ValueError:
+#             energy = 0
+
+#     tags = raw.get("tags", [])
+#     if isinstance(tags, str):
+#         tags = [tags]
+
+#     return {
+#         "title": title,
+#         "artist": artist,
+#         "genre": genre,
+#         "energy": energy,
+#         "tags": tags,
+#     }
 
 
 def classify_song(song: Song, profile: Dict[str, object]) -> str:
@@ -116,8 +145,8 @@ def compute_playlist_stats(playlists: PlaylistMap) -> Dict[str, object]:
     chill = playlists.get("Chill", [])
     mixed = playlists.get("Mixed", [])
 
-    total = len(hype)
-    hype_ratio = len(hype) / total if total > 0 else 0.0
+    total = len(hype) + len(chill) + len(mixed) # not the total number of songs this is the error!
+    hype_ratio = len(hype) / total if total > 0 else 0.0 # hype ratio calculation
 
     avg_energy = 0.0
     if all_songs:
